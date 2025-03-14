@@ -1,8 +1,15 @@
-import supabase from "../../../backend/config/supabaseClient.js";
+const API_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
 export default async function handler(req, res) {
-    const { data, error } = await supabase.from("log_stats").select("*");
-    if (error) return res.status(500).json({ error });
-
-    res.json(data);
+    if (req.method === "GET") {
+        try {
+            const response = await fetch(`${API_URL}/api/stats`);
+            const data = await response.json();
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: "Error fetching stats", details: error.message });
+        }
+    } else {
+        res.status(405).json({ error: "Method Not Allowed" });
+    }
 }
