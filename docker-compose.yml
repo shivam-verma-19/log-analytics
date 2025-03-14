@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   redis:
     image: redis:latest
@@ -14,7 +16,7 @@ services:
       timeout: 5s
 
   backend:
-    build: ./backend  # Backend Dockerfile should be inside the backend folder
+    build: ./backend  # Make sure this matches your backend folder
     container_name: backend
     ports:
       - "4000:4000"
@@ -26,14 +28,14 @@ services:
     restart: always
 
   frontend:
-    build: ./frontend  # Ensure your Next.js app is inside the frontend folder
+    build: ./frontend  # Make sure this matches your frontend folder
     container_name: frontend
     ports:
       - "3000:3000"
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_BACKEND_URL: "http://backend:4000"  # Use backend service name inside Docker
+      NEXT_PUBLIC_BACKEND_URL: "http://backend:4000"
     restart: always
 
 volumes:
