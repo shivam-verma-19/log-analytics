@@ -4,9 +4,10 @@ export default function Dashboard() {
     const [stats, setStats] = useState([]);
 
     useEffect(() => {
-        fetch("/api/stats")
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/stats`)
             .then((res) => res.json())
-            .then(setStats);
+            .then(setStats)
+            .catch((error) => console.error("Error fetching stats:", error));
     }, []);
 
     return (
