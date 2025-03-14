@@ -1,4 +1,4 @@
-import { logQueue } from "../../../backend/queues/logQueue";
+import { logQueue } from "../../../../backend/queues/logQueue";
 
 export default async function handler(req, res) {
     if (req.method === "GET") {

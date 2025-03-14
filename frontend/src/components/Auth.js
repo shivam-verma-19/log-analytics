@@ -2,6 +2,9 @@ import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY);
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_KEY) {
+    console.error("Supabase environment variables are missing!");
+}
 
 export default function Auth() {
     const [email, setEmail] = useState("");

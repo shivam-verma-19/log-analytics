@@ -7,7 +7,7 @@ export default function Dashboard() {
     useEffect(() => {
         async function fetchStats() {
             try {
-                const response = await fetch("/api/stats");
+                const response = await fetch("/api/queue-status");
                 const data = await response.json();
                 setStats(data);
             } catch (error) {
