@@ -2,9 +2,9 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import redisClient from "./config/redisConfig.js";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
+import { client as redisClient, connectRedis } from "./config/redisConfig.js";
 
 dotenv.config(); // Load environment variables
 
@@ -43,20 +43,11 @@ io.on("connection", (socket) => {
     });
 });
 
-// Ensure Redis is connected before starting the server
-redisClient.on("connect", () => {
-    console.log("Connected to Redis");
-
-    const PORT = process.env.PORT || 4000;
-    server.listen(PORT, "0.0.0.0", () => {
-        console.log(`✅ Server running on port ${PORT}`);
-    });
+// Start the server even if Redis is down
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server running on port ${PORT}`);
 });
 
-// Ensure Redis is connected (doesn't block the server start)
-redisClient.on("connect", () => {
-    console.log("Connected to Redis");
-});
-redisClient.on("error", (err) => {
-    console.error("Redis connection error:", err);
-});
+// Attempt to connect Redis asynchronously
+connectRedis();
