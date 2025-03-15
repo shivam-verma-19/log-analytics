@@ -8,53 +8,44 @@ if (!process.env.REDIS_URL) {
     process.exit(1);
 }
 
-console.log("🟢 Connecting to Redis:", process.env.REDIS_URL.trim());
+console.log("🟢 Connecting to Redis:", process.env.REDIS_URL); // Debug log
 
 const client = createClient({
     url: process.env.REDIS_URL.trim(),
     socket: {
-        tls: true,
-        rejectUnauthorized: false, // For self-signed certificates
-        keepAlive: 5000,
+        rejectUnauthorized: false, // Required for Upstash
+        keepAlive: 5000, // Ensures connection stays open
+        reconnectStrategy: (retries) => Math.min(retries * 100, 3000), // Exponential backoff
     },
 });
 
-// Handle errors and auto-reconnect
-let reconnecting = false;
+// Periodic PING to prevent disconnections
+setInterval(async () => {
+    try {
+        await client.ping();
+        console.log("🔄 Redis PING successful");
+    } catch (err) {
+        console.error("⚠️ Redis PING failed:", err);
+    }
+}, 10000); // Every 10 seconds
 
 client.on("error", async (err) => {
     console.error("❌ Redis connection error:", err);
-
-    if (!reconnecting) {
-        reconnecting = true;
-        console.log("🔄 Attempting to reconnect to Redis...");
-
-        setTimeout(async () => {
-            try {
-                await client.connect();
-                console.log("✅ Reconnected to Redis!");
-            } catch (error) {
-                console.error("❌ Redis reconnection failed:", error);
-            } finally {
-                reconnecting = false;
-            }
-        }, 5000); // Retry every 5 seconds
-    }
+    setTimeout(async () => {
+        try {
+            console.log("🔄 Attempting to reconnect to Redis...");
+            await client.connect();
+            console.log("✅ Reconnected to Redis!");
+        } catch (error) {
+            console.error("❌ Redis reconnection failed:", error);
+        }
+    }, 5000); // Retry every 5 seconds
 });
 
-client.on("connect", () => {
-    console.log("✅ Redis connected successfully!");
-    reconnecting = false; // Reset flag on successful connection
-});
-
-client.on("end", () => {
-    console.warn("⚠️ Redis connection closed.");
-});
-
-// Export both client and connection function
 const connectRedis = async () => {
     try {
         await client.connect();
+        console.log("✅ Redis connected successfully!");
     } catch (err) {
         console.error("❌ Redis connection failed:", err);
     }
