@@ -48,9 +48,15 @@ redisClient.on("connect", () => {
     console.log("Connected to Redis");
 
     const PORT = process.env.PORT || 4000;
-    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    server.listen(PORT, "0.0.0.0", () => {
+        console.log(`✅ Server running on port ${PORT}`);
+    });
 });
 
+// Ensure Redis is connected (doesn't block the server start)
+redisClient.on("connect", () => {
+    console.log("Connected to Redis");
+});
 redisClient.on("error", (err) => {
     console.error("Redis connection error:", err);
 });
