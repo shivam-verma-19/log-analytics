@@ -43,11 +43,17 @@ io.on("connection", (socket) => {
     });
 });
 
+app.get("/api/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
 // Start the server even if Redis is down
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 });
+
+
 
 // Attempt to connect Redis asynchronously
 connectRedis();
