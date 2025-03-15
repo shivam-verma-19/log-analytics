@@ -3,16 +3,24 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+if (!process.env.REDIS_URL) {
+    console.error("❌ REDIS_URL is missing in environment variables.");
+    process.exit(1);
+}
+
+console.log("🟢 Connecting to Redis:", process.env.REDIS_URL); // Debug log
+
 const client = createClient({
-    url: process.env.REDIS_URL, // Use the Upstash URL with TLS and password
+    url: process.env.REDIS_URL.trim(),
     socket: {
-        tls: true, // Enable TLS
-        rejectUnauthorized: false, // Ignore self-signed certificate issues
+        tls: true,
+        rejectUnauthorized: false, // For self-signed certificates
     },
 });
 
-client.on("error", (err) => console.error("Redis connection error:", err));
+client.on("error", (err) => console.error("❌ Redis connection error:", err));
 
 await client.connect();
 
+console.log("✅ Redis connected successfully!");
 export default client;
