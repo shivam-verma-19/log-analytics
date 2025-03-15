@@ -1,26 +1,56 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import cors from "cors";
 import redisClient from "./config/redisConfig.js";
 import rateLimit from "express-rate-limit";
+import dotenv from "dotenv";
+
+dotenv.config(); // Load environment variables
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
 
+// Allow frontend access via CORS
+app.use(cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"]
+}));
+
+// Rate limiter to prevent abuse
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    max: 100, // Limit each IP to 100 requests
     message: "Too many requests, please try again later."
 });
 
-app.use("/api/", limiter);
+app.use("/api/", limiter); // Apply rate-limiting to API routes
 
-io.on("connection", (socket) => {
-    console.log("Client connected");
-    socket.on("disconnect", () => console.log("Client disconnected"));
+const io = new Server(server, {
+    cors: {
+        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        methods: ["GET", "POST"]
+    }
 });
 
-server.listen(4000, () => console.log("Server running on port 4000"));
+// WebSocket Connection Handling
+io.on("connection", (socket) => {
+    console.log("Client connected");
 
-// Apply rate-limiting to all API routes
+    socket.on("disconnect", () => {
+        console.log("Client disconnected");
+    });
+});
+
+// Ensure Redis is connected before starting the server
+redisClient.on("connect", () => {
+    console.log("Connected to Redis");
+
+    const PORT = process.env.PORT || 4000;
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+});
+
+redisClient.on("error", (err) => {
+    console.error("Redis connection error:", err);
+});

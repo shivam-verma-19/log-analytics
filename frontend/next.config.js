@@ -1,13 +1,10 @@
 /** @type {import('next').NextConfig} */
-module.exports = {
-    output: 'standalone', // Ensures Vercel deploys correctly
-    reactStrictMode: true,
-    async rewrites() {
-        return [
-            {
-                source: "/:path*",
-                destination: "/index.html",
-            },
-        ];
-    },
+const nextConfig = {
+    webpack: (config) => {
+        config.externals = config.externals || [];
+        config.externals.push("backend"); // Exclude backend from Next.js bundle
+        return config;
+    }
 };
+
+export default nextConfig;
