@@ -3,10 +3,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const redisClient = createClient({
-    url: process.env.REDIS_HOST || "redis://localhost:6379"
+const client = createClient({
+    url: process.env.REDIS_URL, // Use the Upstash URL with TLS and password
+    socket: {
+        tls: true, // Enable TLS
+        rejectUnauthorized: false, // Ignore self-signed certificate issues
+    },
 });
 
-redisClient.connect().catch(console.error);
+client.on("error", (err) => console.error("Redis connection error:", err));
 
-export default redisClient;
+await client.connect();
+
