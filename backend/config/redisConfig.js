@@ -15,3 +15,4 @@ client.on("error", (err) => console.error("Redis connection error:", err));
 
 await client.connect();
 
+export default client;
