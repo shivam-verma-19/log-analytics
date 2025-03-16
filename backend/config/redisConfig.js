@@ -8,7 +8,7 @@ if (!process.env.REDIS_URL) {
     process.exit(1);
 }
 
-console.log("🟢 Connecting to Redis:", process.env.REDIS_URL);
+console.log("🟢 Connecting to Redis:", process.env.REDIS_URL); // Debug log
 
 const client = createClient({
     url: process.env.REDIS_URL.trim(),
@@ -36,10 +36,24 @@ client.ping()
 // Event Listeners
 client.on("error", (err) => {
     console.error("❌ Redis connection error:", err);
+    setTimeout(async () => {
+        try {
+            console.log("🔄 Attempting to reconnect to Redis...");
+            await client.connect();
+            console.log("✅ Reconnected to Redis!");
+        } catch (error) {
+            console.error("❌ Redis reconnection failed:", error);
+        }
+    }, 5000); // Retry every 5 seconds
 });
 
-client.on("connect", () => {
-    console.log("✅ Redis connected successfully!");
-});
+const connectRedis = async () => {
+    try {
+        await client.connect();
+        console.log("✅ Redis connected successfully!");
+    } catch (err) {
+        console.error("❌ Redis connection failed:", err);
+    }
+};
 
 export default client;

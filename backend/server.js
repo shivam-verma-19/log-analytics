@@ -65,3 +65,7 @@ server.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 });
 
+
+
+// Attempt to connect Redis asynchronously
+connectRedis();
