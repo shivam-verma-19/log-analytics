@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import client from '../config/redisConfig.js';
+import { client } from '../config/redisConfig.js';
 
 export const logQueue = new Queue('log-processing-queue', {
     connection: client,
