@@ -15,7 +15,21 @@ const client = new IORedis(process.env.REDIS_URL, {
     tls: { rejectUnauthorized: false }, // Required for Upstash
 });
 
-// Event Listeners (No Manual Connection)
+// Test Redis connection
+client.ping()
+    .then((response) => {
+        if (response === "PONG") {
+            console.log("✅ Redis PING successful! Connection is healthy.");
+        } else {
+            console.error("❌ Redis PING failed. Unexpected response:", response);
+        }
+    })
+    .catch((err) => {
+        console.error("❌ Redis PING error:", err);
+        process.exit(1); // Exit the process if the connection test fails
+    });
+
+// Event Listeners
 client.on("error", (err) => {
     console.error("❌ Redis connection error:", err);
 });
@@ -24,4 +38,4 @@ client.on("connect", () => {
     console.log("✅ Redis connected successfully!");
 });
 
-export default client;  // No need to export `connectRedis`
+export default client;
