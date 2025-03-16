@@ -1,10 +1,5 @@
 import { useState } from "react";
-import supabase from "../config/supabaseClient";
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.error("Supabase environment variables are missing!");
-}
+import supabase from "../config/supabaseClient";  // ✅ Use the imported Supabase client
 
 export default function Auth() {
     const [email, setEmail] = useState("");
@@ -15,8 +10,7 @@ export default function Auth() {
     const handleSignUp = async () => {
         setLoading(true);
         setError(null);
-
-        const { user, error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email, password });
 
         if (error) setError(error.message);
         else alert("Check your email for a confirmation link!");
@@ -27,21 +21,18 @@ export default function Auth() {
     const handleSignIn = async () => {
         setLoading(true);
         setError(null);
-
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) {
             setError(error.message);
         } else {
             alert("Signed in successfully!");
-            localStorage.setItem('supabaseToken', data.session.access_token);
+            localStorage.setItem("supabaseToken", data.session.access_token);
             supabase.auth.setSession(data.session);
-            console.log("Token saved:", data.session.access_token);
         }
 
         setLoading(false);
     };
-
 
     return (
         <div className="p-4 max-w-md mx-auto">

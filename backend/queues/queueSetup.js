@@ -1,4 +1,4 @@
-import { QueueScheduler } from "bullmq";
+import QueueScheduler from "bullmq";
 import client from "../config/redisConfig.js";
 
 const scheduler = new QueueScheduler("log-processing-queue", { connection: client });
