@@ -1,12 +1,15 @@
 import express from "express";
 import { authenticateUser } from "../middleware/authMiddleware.js";
+import supabase from "../config/supabaseClient.js";
 
 const router = express.Router();
 
-router.get("/", authenticateUser, async (req, res) => {
+// API route to fetch aggregated log stats
+router.get("/stats", authenticateUser, async (req, res) => {
     try {
-        // Fetch and return stats
-        res.json({ success: true, message: "Stats data fetched successfully" });
+        const { data, error } = await supabase.from("log_stats").select("*");
+        if (error) throw error;
+        res.json(data);
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch stats" });
     }

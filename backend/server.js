@@ -4,9 +4,10 @@ import { Server } from "socket.io";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
-import { client as redisClient, connectRedis } from "./config/redisConfig.js";
 import uploadRoutes from "./routes/upload.js";
 import statsRoutes from "./routes/stats.js";
+import queueStatusRoutes from "./routes/queue-status.js";
+
 
 dotenv.config(); // Load environment variables
 
@@ -27,8 +28,9 @@ const limiter = rateLimit({
     max: 100, // Limit each IP to 100 requests
     message: "Too many requests, please try again later."
 });
-app.use("/api/upload", uploadRoutes);
-app.use("/api/stats", statsRoutes);
+app.use("/api", uploadRoutes);
+app.use("/api", statsRoutes);
+app.use("/api", queueStatusRoutes);
 app.use("/api/", limiter); // Apply rate-limiting to API routes
 
 const io = new Server(server, {
