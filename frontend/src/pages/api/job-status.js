@@ -1,4 +1,4 @@
-const API_URL = process.env.BACKEND_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default async function handler(req, res) {
     if (req.method === "GET") {
