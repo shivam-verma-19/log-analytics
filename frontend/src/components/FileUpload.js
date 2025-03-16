@@ -24,7 +24,7 @@ export default function UploadForm() {
         console.log("📡 Uploading to:", `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload`);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload-logs`, {
                 method: "POST",
                 body: formData,
                 headers: {
