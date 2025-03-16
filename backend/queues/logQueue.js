@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import redis from '../redisClient.js';
+import redis from '../config/redisConfig.js';
 
 export const logQueue = new Queue('log-processing-queue', {
     connection: redis,
