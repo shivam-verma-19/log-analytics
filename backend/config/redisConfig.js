@@ -8,42 +8,20 @@ if (!process.env.REDIS_URL) {
     process.exit(1);
 }
 
-console.log("🟢 Connecting to Redis:", process.env.REDIS_URL); // Debug log
+console.log("🟢 Connecting to Redis:", process.env.REDIS_URL);
 
+// Create Redis client (auto-connects)
 const client = new IORedis(process.env.REDIS_URL, {
     tls: { rejectUnauthorized: false }, // Required for Upstash
 });
 
-// Periodic PING to prevent disconnections
-setInterval(async () => {
-    try {
-        await client.ping();
-        console.log("🔄 Redis PING successful");
-    } catch (err) {
-        console.error("⚠️ Redis PING failed:", err);
-    }
-}, 10000); // Every 10 seconds
-
-client.on("error", async (err) => {
+// Event Listeners (No Manual Connection)
+client.on("error", (err) => {
     console.error("❌ Redis connection error:", err);
-    setTimeout(async () => {
-        try {
-            console.log("🔄 Attempting to reconnect to Redis...");
-            await client.connect();
-            console.log("✅ Reconnected to Redis!");
-        } catch (error) {
-            console.error("❌ Redis reconnection failed:", error);
-        }
-    }, 5000); // Retry every 5 seconds
 });
 
-const connectRedis = async () => {
-    try {
-        await client.connect();
-        console.log("✅ Redis connected successfully!");
-    } catch (err) {
-        console.error("❌ Redis connection failed:", err);
-    }
-};
+client.on("connect", () => {
+    console.log("✅ Redis connected successfully!");
+});
 
-export { client, connectRedis };
+export default client;  // No need to export `connectRedis`
