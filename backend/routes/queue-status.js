@@ -1,10 +1,11 @@
-import express from "express";
-import { Queue, QueueScheduler } from "bullmq"; // Import Queue
-import client from "../config/redisConfig.js"; // Redis connection
+import * as BullMQ from "bullmq";
+import client from "../config/redisConfig.js";
+
+const { Queue, QueueScheduler } = BullMQ; // Destructure the imported module
 
 const router = express.Router();
 
-// Initialize Queue (specific to queue-status.js)
+// Initialize Queue
 const queue = new Queue("log-processing-queue", { connection: client });
 const queueScheduler = new QueueScheduler("log-processing-queue", { connection: client });
 
