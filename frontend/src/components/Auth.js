@@ -28,13 +28,20 @@ export default function Auth() {
         setLoading(true);
         setError(null);
 
-        const { user, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-        if (error) setError(error.message);
-        else alert("Signed in successfully!");
+        if (error) {
+            setError(error.message);
+        } else {
+            alert("Signed in successfully!");
+            localStorage.setItem('supabaseToken', data.session.access_token);
+            supabase.auth.setSession(data.session);
+            console.log("Token saved:", data.session.access_token);
+        }
 
         setLoading(false);
     };
+
 
     return (
         <div className="p-4 max-w-md mx-auto">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import FileUpload from "@/components/FileUpload";
+import FileUpload from "../components/FileUpload";
 
 export default function Dashboard() {
     const [stats, setStats] = useState([]);

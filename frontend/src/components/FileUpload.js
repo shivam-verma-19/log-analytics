@@ -9,7 +9,8 @@ export default function UploadForm() {
         const formData = new FormData();
         formData.append('file', file);
 
-        const token = localStorage.getItem('supabaseToken'); // Assuming token is stored in localStorage
+        const token = localStorage.getItem('supabaseToken');
+        console.log("Supabase Token:", token);
 
         const res = await fetch('/api/upload', {
             method: 'POST',
