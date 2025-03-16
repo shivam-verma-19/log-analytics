@@ -8,33 +8,18 @@ if (!process.env.REDIS_URL) {
     process.exit(1);
 }
 
-console.log("🟢 Connecting to Redis:", process.env.REDIS_URL); // Debug log
+console.log("🟢 Connecting to Redis:", process.env.REDIS_URL);
 
 const client = createClient({
     url: process.env.REDIS_URL.trim(),
     socket: {
         rejectUnauthorized: false, // Required for Upstash
-        keepAlive: 5000, // Ensures connection stays open
-        reconnectStrategy: (retries) => Math.min(retries * 100, 3000), // Exponential backoff
+        keepAlive: 5000,
+        reconnectStrategy: (retries) => Math.min(retries * 100, 3000),
     },
 });
 
-// Test Redis connection
-client.ping()
-    .then((response) => {
-        if (response === "PONG") {
-            console.log("✅ Redis PING successful! Connection is healthy.");
-        } else {
-            console.error("❌ Redis PING failed. Unexpected response:", response);
-        }
-    })
-    .catch((err) => {
-        console.error("❌ Redis PING error:", err);
-        process.exit(1); // Exit the process if the connection test fails
-    });
-
-// Event Listeners
-client.on("error", (err) => {
+client.on("error", async (err) => {
     console.error("❌ Redis connection error:", err);
     setTimeout(async () => {
         try {
@@ -44,16 +29,32 @@ client.on("error", (err) => {
         } catch (error) {
             console.error("❌ Redis reconnection failed:", error);
         }
-    }, 5000); // Retry every 5 seconds
+    }, 5000);
 });
+
+// ✅ Ensure Redis is connected before running PING
+setInterval(async () => {
+    try {
+        if (!client.isOpen) {
+            console.warn("⚠️ Redis client is closed. Attempting to reconnect...");
+            await client.connect();
+        }
+        await client.ping();
+        console.log("🔄 Redis PING successful");
+    } catch (err) {
+        console.error("⚠️ Redis PING failed:", err);
+    }
+}, 10000);
 
 const connectRedis = async () => {
     try {
-        await client.connect();
+        if (!client.isOpen) {
+            await client.connect();
+        }
         console.log("✅ Redis connected successfully!");
     } catch (err) {
         console.error("❌ Redis connection failed:", err);
     }
 };
 
-export default client;
+export { client, connectRedis };
