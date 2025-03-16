@@ -1,6 +1,6 @@
 import express from "express";
 import * as BullMQ from "bullmq";
-import client from "../config/redisConfig.js";
+import  { client } from "../config/redisConfig.js";
 
 const { Queue } = BullMQ; // ✅ Only import Queue, NOT QueueScheduler
 
