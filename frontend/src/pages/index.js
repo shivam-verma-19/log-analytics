@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import FileUpload from "@/components/FileUpload";
 
 export default function Dashboard() {
     const [stats, setStats] = useState([]);
@@ -13,6 +14,7 @@ export default function Dashboard() {
     return (
         <div>
             <h1>Log Processor Dashboard</h1>
+            <FileUpload />
             <ul>
                 {stats.map((stat) => (
                     <li key={stat.id}>
