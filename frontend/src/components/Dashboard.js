@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import UploadForm from "../components/FileUpload";
 
 export default function Dashboard() {
     const [stats, setStats] = useState([]);
@@ -25,6 +26,10 @@ export default function Dashboard() {
     return (
         <div className="p-4">
             <h2 className="text-2xl font-bold">Log Processing Stats</h2>
+
+            {/* File Upload Section */}
+            <UploadForm />
+
             <table className="table-auto w-full mt-4 border-collapse border border-gray-300">
                 <thead>
                     <tr className="bg-gray-100">

@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 
 const processLargeFile = (filePath) => {
     return new Promise((resolve, reject) => {
-        const worker = new ThreadWorker(join(__dirname, "logWorker.js"));
+        const worker = new ThreadWorker(new URL("./logWorker.js", import.meta.url));
 
         worker.on("message", (logStats) => resolve(logStats));
         worker.on("error", reject);

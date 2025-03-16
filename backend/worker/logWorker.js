@@ -12,5 +12,7 @@ parentPort.on("message", async (filePath) => {
         if (line.includes("ERROR")) logStats.errors++;
     }
 
+    logStats.ips = Array.from(logStats.ips);
     parentPort.postMessage(logStats);
+
 });

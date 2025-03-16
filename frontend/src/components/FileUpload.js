@@ -9,7 +9,16 @@ export default function UploadForm() {
         const formData = new FormData();
         formData.append('file', file);
 
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const token = localStorage.getItem('supabaseToken'); // Assuming token is stored in localStorage
+
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${token}` // Attach token
+            }
+        });
+
         const data = await res.json();
         alert(`Job submitted! Job ID: ${data.jobId}`);
     };
