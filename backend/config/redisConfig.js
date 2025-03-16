@@ -1,4 +1,4 @@
-import IORedis from "ioredis";
+import { createClient } from "redis";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -10,9 +10,13 @@ if (!process.env.REDIS_URL) {
 
 console.log("🟢 Connecting to Redis:", process.env.REDIS_URL);
 
-// Create Redis client (auto-connects)
-const client = new IORedis(process.env.REDIS_URL, {
-    tls: { rejectUnauthorized: false }, // Required for Upstash
+const client = createClient({
+    url: process.env.REDIS_URL.trim(),
+    socket: {
+        rejectUnauthorized: false, // Required for Upstash
+        keepAlive: 5000, // Ensures connection stays open
+        reconnectStrategy: (retries) => Math.min(retries * 100, 3000), // Exponential backoff
+    },
 });
 
 // Test Redis connection
