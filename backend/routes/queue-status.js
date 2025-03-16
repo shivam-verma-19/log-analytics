@@ -1,11 +1,10 @@
 import express from "express";
-import Queue from "bullmq";
-import QueueScheduler from "bullmq"
+import * as BullMQ from "bullmq";
 import client from "../config/redisConfig.js";
 
 const router = express.Router();
-const queue = new Queue("log-processing-queue", { connection: client });
-const queueScheduler = new QueueScheduler("log-processing-queue", { connection: client });
+const queue = new BullMQ.Queue("log-processing-queue", { connection: client });
+const queueScheduler = new BullMQ.QueueScheduler("log-processing-queue", { connection: client });
 
 // API route to check queue status
 router.get("/queue-status", async (req, res) => {
