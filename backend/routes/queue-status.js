@@ -1,6 +1,6 @@
 import express from "express";
 import * as BullMQ from "bullmq";  // ✅ Correct way to import a CommonJS module in ESM
-import { client } from "../config/redisConfig.js";
+import client from "../config/redisConfig.js";
 
 const { Queue, QueueScheduler } = BullMQ;
 
