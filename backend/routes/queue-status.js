@@ -1,5 +1,6 @@
 import * as BullMQ from "bullmq";
 import { client } from "../config/redisConfig.js";
+import express from "express";
 
 const { Queue, QueueScheduler } = BullMQ; // Destructure the imported module
 
