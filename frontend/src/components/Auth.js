@@ -1,5 +1,6 @@
 import { useState } from "react";
 import supabase from "../config/supabaseClient";  // ✅ Use the imported Supabase client
+import { useRouter } from "next/router";
 
 export default function Auth() {
     const [email, setEmail] = useState("");
@@ -18,6 +19,8 @@ export default function Auth() {
         setLoading(false);
     };
 
+    const router = useRouter();  // ✅ Initialize router
+
     const handleSignIn = async () => {
         setLoading(true);
         setError(null);
@@ -29,10 +32,14 @@ export default function Auth() {
             alert("Signed in successfully!");
             localStorage.setItem("supabaseToken", data.session.access_token);
             supabase.auth.setSession(data.session);
+
+            // ✅ Redirect to Dashboard
+            router.push("/");
         }
 
         setLoading(false);
     };
+
 
     return (
         <div className="p-4 max-w-md mx-auto">
