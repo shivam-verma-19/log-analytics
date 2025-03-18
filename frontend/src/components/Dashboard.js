@@ -72,15 +72,19 @@ export default function Dashboard() {
                     </tr>
                 </thead>
                 <tbody>
-                    {stats.map((stat) => (
-                        <tr key={stat.id} className="border-t">
-                            <td className="p-2">{stat.job_id}</td>
-                            <td className="p-2">{stat.error_count}</td>
-                            <td className="p-2">{JSON.stringify(stat.keyword_count)}</td>
-                            <td className="p-2">{JSON.stringify(stat.unique_ips)}</td>
-                            <td className="p-2">{new Date(stat.created_at).toLocaleString()}</td>
-                        </tr>
-                    ))}
+                    {Array.isArray(stats) && stats.length > 0 ? (
+                        stats.map((stat) => (
+                            <tr key={stat.id} className="border-t">
+                                <td className="p-2">{stat.job_id}</td>
+                                <td className="p-2">{stat.error_count}</td>
+                                <td className="p-2">{JSON.stringify(stat.keyword_count)}</td>
+                                <td className="p-2">{JSON.stringify(stat.unique_ips)}</td>
+                                <td className="p-2">{new Date(stat.created_at).toLocaleString()}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr><td colSpan="5" className="p-2 text-center">No data available</td></tr>
+                    )}
                 </tbody>
             </table>
         </div>

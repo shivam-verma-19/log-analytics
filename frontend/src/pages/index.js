@@ -24,7 +24,7 @@ export default function Dashboard() {
         if (user) {
             fetch(`/api/stats`)
                 .then((res) => res.json())
-                .then(setStats)
+                .then((data) => setStats(Array.isArray(data) ? data : [])) // Ensure it's an array
                 .catch((error) => console.error("Error fetching stats:", error));
         }
     }, [user]);
