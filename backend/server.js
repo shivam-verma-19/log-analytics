@@ -17,12 +17,18 @@ const server = createServer(app);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// Allow frontend access via CORS
-app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
+const errorHandler = (err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal Server Error' });
+};
+app.use(errorHandler);
+
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
 
 // Rate limiter to prevent abuse
 const limiter = rateLimit({

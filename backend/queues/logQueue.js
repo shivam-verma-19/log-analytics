@@ -8,3 +8,7 @@ export const logQueue = new Queue('log-processing-queue', {
         priority: 1, // Lower number = higher priority
     },
 });
+logQueue.on("failed", (job, err) => {
+    console.error(`Job ${job.id} failed:`, err);
+    // Optionally retry the job or notify an admin
+});

@@ -14,7 +14,7 @@ export default function UploadForm() {
         formData.append("file", file);
 
         // ✅ Ensure Supabase token exists
-        const token = localStorage.getItem("supabaseToken");
+        const token = await supabase.auth.getSession().then(({ data }) => data.session?.access_token);
         if (!token) {
             alert("User is not authenticated. Please log in again.");
             return;

@@ -12,5 +12,10 @@ const processLargeFile = (filePath) => {
         worker.on("message", (logStats) => resolve(logStats));
         worker.on("error", reject);
         worker.postMessage(filePath);
+        worker.on("exit", (code) => {
+            if (code !== 0) {
+                console.error(`Worker exited with code ${code}`);
+            }
+        });
     });
 };
