@@ -23,7 +23,7 @@ export default function Dashboard() {
         }
 
         fetchStats(token);
-        const ws = new WebSocket('ws://localhost:3000/api/live-stats'); // Adjust WebSocket URL
+        const ws = new WebSocket('ws://log-analytics-backend.onrender.com/api/live-stats'); // Adjust WebSocket URL
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             setStats((prev) => [data, ...prev]); // Update with real-time data

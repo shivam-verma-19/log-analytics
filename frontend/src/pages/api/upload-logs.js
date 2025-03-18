@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     if (req.method === "POST") {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload-logs`, {
+            const response = await fetch(`/api/upload-logs`, {
                 method: "POST",
                 body: req.body,
                 headers: {

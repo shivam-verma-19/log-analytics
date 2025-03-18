@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     if (req.method === "GET") {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/stats`);
+            const response = await fetch(`/api/stats`);
             const data = await response.json();
             return res.status(200).json(data);
         } catch (error) {

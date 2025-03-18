@@ -22,10 +22,10 @@ export default function UploadForm() {
         }
 
         console.log("🔑 Supabase Token:", token);
-        console.log("📡 Uploading to:", `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload`);
+        console.log("📡 Uploading to:", `/api/upload`);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload-logs`, {
+            const res = await fetch(`/api/upload-logs`, {
                 method: "POST",
                 body: formData,
                 headers: {

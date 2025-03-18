@@ -22,7 +22,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (user) {
-            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/stats`)
+            fetch(`/api/stats`)
                 .then((res) => res.json())
                 .then(setStats)
                 .catch((error) => console.error("Error fetching stats:", error));
