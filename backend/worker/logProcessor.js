@@ -1,21 +1,23 @@
 import { Worker as ThreadWorker } from "worker_threads";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { queue } from "../queues/logQueue.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const processLargeFile = (filePath) => {
-    return new Promise((resolve, reject) => {
-        const worker = new ThreadWorker(new URL("./logWorker.js", import.meta.url));
+const processLargeFile = async (filePath, fileId) => {
+    const stats = await fs.statSync(filePath);  // 🔥 Get file size
+    const fileSize = stats.size; // in bytes
 
-        worker.on("message", (logStats) => resolve(logStats));
-        worker.on("error", reject);
-        worker.postMessage(filePath);
-        worker.on("exit", (code) => {
-            if (code !== 0) {
-                console.error(`Worker exited with code ${code}`);
-            }
-        });
+    const priority = fileSize < 10 * 1024 * 1024 ? 1 : 5; // 🔥 Smaller files get higher priority
+
+    const job = await queue.add("log-processing", { filePath, fileId }, {
+        priority,
+        attempts: 3,
+        removeOnComplete: true, // 🔥 Clean up jobs after completion
+        removeOnFail: false, // 🔥 Keep failed jobs for debugging
     });
+
+    return job.id;
 };

@@ -4,10 +4,13 @@ import supabase from "../config/supabaseClient.js";
 
 const router = express.Router();
 
-// API route to fetch aggregated log stats
 router.get("/stats", authenticateUser, async (req, res) => {
     try {
-        const { data, error } = await supabase.from("log_stats").select("*");
+        const { data, error } = await supabase
+            .from("log_stats")
+            .select("*")
+            .eq("user_id", req.user.id); // ✅ Ensure filtering per user
+
         if (error) throw error;
         res.json(data);
     } catch (error) {
