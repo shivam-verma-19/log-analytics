@@ -6,15 +6,23 @@ const router = express.Router();
 
 router.get("/stats", authenticateUser, async (req, res) => {
     try {
+        console.log("✅ Fetching log stats for user:", req.user.id);
+
         const { data, error } = await supabase
             .from("log_stats")
             .select("*")
-            .eq("user_id", req.user.id); // ✅ Ensure filtering per user
+            .eq("user_id", req.user.id);
 
-        if (error) throw error;
+        if (error) {
+            console.error("❌ Supabase Query Error:", error.message);
+            throw error;
+        }
+
+        console.log("📊 Retrieved Data:", data);
         res.json(data);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch stats" });
+        console.error("❌ Error fetching stats:", error.message);
+        res.status(500).json({ error: "Error fetching stats", details: error.message });
     }
 });
 
