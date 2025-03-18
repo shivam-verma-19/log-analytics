@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import supabase from "../config/supabaseClient";
 
 export default function UploadForm() {
     const [file, setFile] = useState(null);

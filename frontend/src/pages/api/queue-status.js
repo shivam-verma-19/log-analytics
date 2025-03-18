@@ -1,9 +1,7 @@
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-
 export default async function handler(req, res) {
     if (req.method === "GET") {
         try {
-            const response = await fetch(`${API_URL}/api/queue-status`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/queue-status`);
             const jobCounts = await response.json();
             return res.status(200).json(jobCounts);
         } catch (error) {
