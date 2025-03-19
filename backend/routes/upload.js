@@ -20,3 +20,5 @@ router.post("/upload-logs", authenticateUser, upload.single("file"), async (req,
         res.status(500).json({ error: "Failed to upload log file" });
     }
 });
+
+export default router;
