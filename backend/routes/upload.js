@@ -1,3 +1,11 @@
+import { authenticateUser } from "../middleware/authMiddleware.js";
+import express from "express";
+import { logQueue } from "../queues/logQueue.js";
+import multer from "multer";
+const router = express.Router();
+
+const upload = multer({ dest: "uploads/" });
+
 router.post("/upload-logs", authenticateUser, upload.single("file"), async (req, res) => {
     try {
         if (!req.file) {
