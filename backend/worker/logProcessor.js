@@ -7,17 +7,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const processLargeFile = async (filePath, fileId) => {
-    const stats = await fs.statSync(filePath);  // 🔥 Get file size
-    const fileSize = stats.size; // in bytes
+    const stats = await fs.statSync(filePath);
+    const fileSize = stats.size;
 
-    const priority = fileSize < 10 * 1024 * 1024 ? 1 : 5; // 🔥 Smaller files get higher priority
+    const priority = fileSize < 10 * 1024 * 1024 ? 1 : 5;
 
-    const job = await queue.add("log-processing", { filePath, fileId }, {
-        priority,
-        attempts: 3,
-        removeOnComplete: true, // 🔥 Clean up jobs after completion
-        removeOnFail: false, // 🔥 Keep failed jobs for debugging
-    });
+    try {
+        const job = await queue.add(
+            "log-processing",
+            { filePath, fileId },
+            {
+                priority,
+                attempts: 3,
+                removeOnComplete: true,
+                removeOnFail: false,
+            }
+        );
 
-    return job.id;
+        if (!job) throw new Error("Failed to enqueue job!");
+
+        console.log(`📨 Job ${job.id} added successfully`);
+        return job.id;
+    } catch (error) {
+        console.error("❌ Error adding job to queue:", error.message);
+        return null; // Handle undefined Job ID
+    }
 };
+

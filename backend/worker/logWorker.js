@@ -45,10 +45,15 @@ const worker = new Worker(
                 throw error;
             }
 
-            console.log(`✅ Job ${job.id} processed successfully.`);
+            console.log(`📥 Processing job: ${job.id}, File Path: ${job.data.filePath}`);
+            if (!job.id) {
+                console.error("❌ Job ID is undefined! Skipping...");
+                return;
+            }
         } catch (err) {
             console.error(`❌ Error processing job ${job.id}:`, err.message);
         }
+
     },
     { connection: redisConnection, concurrency: 4 }
 );

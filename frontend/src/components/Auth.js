@@ -20,6 +20,26 @@ export default function Auth() {
     };
 
     const router = useRouter();  // ✅ Initialize router
+    let logoutTimer;
+
+    const resetTimer = () => {
+        clearTimeout(logoutTimer);
+        logoutTimer = setTimeout(() => {
+            supabase.auth.signOut();
+            localStorage.removeItem("supabaseToken"); // ✅ Remove session token
+            router.push("/auth"); // ✅ Redirect to login page
+        }, 10 * 60 * 1000); // 10 minutes
+    };
+
+    useEffect(() => {
+        window.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onkeydown = resetTimer;
+
+        return () => {
+            clearTimeout(logoutTimer);
+        };
+    }, []);
 
     const handleSignIn = async () => {
         setLoading(true);
