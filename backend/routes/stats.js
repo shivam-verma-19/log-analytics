@@ -6,7 +6,12 @@ const router = express.Router();
 
 router.get("/stats", authenticateUser, async (req, res) => {
     try {
-        console.log("✅ Fetching log stats for user:", req.user.id);
+        console.log("✅ Fetching log stats for user:", req.user); // Log full user object
+
+        if (!req.user || !req.user.id) {
+            console.error("❌ Missing user ID in request.");
+            return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+        }
 
         const { data, error } = await supabase
             .from("log_stats")
