@@ -1,5 +1,5 @@
-import { useState } from "react";
-import supabase from "../config/supabaseClient";  // ✅ Use the imported Supabase client
+import { useState, useEffect } from "react";
+import supabase from "../config/supabaseClient";
 import { useRouter } from "next/router";
 
 export default function Auth() {
@@ -7,6 +7,49 @@ export default function Auth() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [session, setSession] = useState(null); // Track session state
+
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setSession(session);
+        };
+
+        checkSession();
+
+        const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+            setSession(session);
+        });
+
+        return () => listener.subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        let logoutTimer;
+
+        const resetTimer = () => {
+            clearTimeout(logoutTimer);
+            logoutTimer = setTimeout(() => {
+                supabase.auth.signOut();
+                localStorage.removeItem("supabaseToken"); // ✅ Clear session
+                router.push("/auth"); // ✅ Redirect to login
+            }, 5 * 60 * 1000); // 5 minutes
+        };
+
+        if (session) {
+            resetTimer();
+            window.addEventListener("mousemove", resetTimer);
+            window.addEventListener("keydown", resetTimer);
+        }
+
+        return () => {
+            clearTimeout(logoutTimer);
+            window.removeEventListener("mousemove", resetTimer);
+            window.removeEventListener("keydown", resetTimer);
+        };
+    }, [session]);
 
     const handleSignUp = async () => {
         setLoading(true);
@@ -19,28 +62,6 @@ export default function Auth() {
         setLoading(false);
     };
 
-    const router = useRouter();  // ✅ Initialize router
-    let logoutTimer;
-
-    const resetTimer = () => {
-        clearTimeout(logoutTimer);
-        logoutTimer = setTimeout(() => {
-            supabase.auth.signOut();
-            localStorage.removeItem("supabaseToken"); // ✅ Remove session token
-            router.push("/auth"); // ✅ Redirect to login page
-        }, 10 * 60 * 1000); // 10 minutes
-    };
-
-    useEffect(() => {
-        window.onload = resetTimer;
-        document.onmousemove = resetTimer;
-        document.onkeydown = resetTimer;
-
-        return () => {
-            clearTimeout(logoutTimer);
-        };
-    }, []);
-
     const handleSignIn = async () => {
         setLoading(true);
         setError(null);
@@ -52,14 +73,11 @@ export default function Auth() {
             alert("Signed in successfully!");
             localStorage.setItem("supabaseToken", data.session.access_token);
             supabase.auth.setSession(data.session);
-
-            // ✅ Redirect to Dashboard
-            router.push("/");
+            router.push("/"); // Redirect to Dashboard
         }
 
         setLoading(false);
     };
-
 
     return (
         <div className="p-4 max-w-md mx-auto">
