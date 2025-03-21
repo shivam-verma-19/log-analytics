@@ -40,6 +40,9 @@ export default function UploadForm() {
             }
 
             const data = await res.json();
+
+            if (!data.jobId) throw new Error("Job ID is missing from response");
+
             alert(`✅ Job submitted! Job ID: ${data.jobId}`);
         } catch (error) {
             console.error("❌ Upload failed:", error);

@@ -4,11 +4,6 @@ import { useEffect, useState } from 'react';
 import supabase from "../config/supabaseClient";
 import { useRouter } from 'next/navigation';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export default function Dashboard() {
     const [stats, setStats] = useState([]);
     const [file, setFile] = useState(null);
@@ -16,14 +11,21 @@ export default function Dashboard() {
     const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem('supabaseToken');
-        if (!token) {
-            router.push('/login'); // Redirect to login if no token
-            return;
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                router.push('/login'); // Redirect to login if no session
+                return;
+            }
+
+            fetchStats(); // Fetch logs only after verifying auth
         }
 
+        checkAuth();
+
         fetchStats(token);
-        const ws = new WebSocket('ws://log-analytics-backend.onrender.com/api/live-stats'); // Adjust WebSocket URL
+        const ws = new WebSocket('wss://log-analytics-backend.onrender.com/api/live-stats'); // Adjust WebSocket URL
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             setStats((prev) => [data, ...prev]); // Update with real-time data
@@ -32,12 +34,8 @@ export default function Dashboard() {
         return () => ws.close();
     }, []);
 
-    async function fetchStats(token) {
-        const { data, error } = await supabase
-            .from('log_stats')
-            .select('*')
-            .auth(token);
-
+    async function fetchStats() {
+        const { data, error } = await supabase.from('log_stats').select('*');
         if (error) console.error('Error fetching stats:', error);
         else setStats(data);
     }
@@ -46,7 +44,11 @@ export default function Dashboard() {
         if (!file) return;
         setUploading(true);
 
-        const { data, error } = await supabase.storage.from('logs').upload(`logs/${file.name}`, file);
+        const filePath = `logs/${Date.now()}_${file.name}`;
+        const { data, error } = await supabase.storage.from('logs').upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false // Prevent overwriting
+        });
         if (error) console.error('Upload error:', error);
         else alert('File uploaded successfully!');
 
