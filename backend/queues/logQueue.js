@@ -8,7 +8,13 @@ export const logQueue = new Queue('log-processing-queue', {
         priority: 1, // Lower number = higher priority
     },
 });
-logQueue.on("failed", (job, err) => {
+logQueue.on("failed", async (job, err) => {
     console.error(`Job ${job.id} failed:`, err);
-    // Optionally retry the job or notify an admin
+
+    if (job.attemptsMade < job.opts.attempts) {
+        console.log(`Retrying job ${job.id} (Attempt ${job.attemptsMade + 1})`);
+        await job.retry();
+    } else {
+        console.error(`Job ${job.id} permanently failed after max attempts.`);
+    }
 });

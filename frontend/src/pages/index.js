@@ -4,8 +4,9 @@ import FileUpload from "../components/FileUpload";
 import supabase from "../config/supabaseClient";
 
 export default function Dashboard() {
-    const [stats, setStats] = useState([]);
+    // Removed duplicate declaration of stats
     const [user, setUser] = useState(null);
+    const [stats, setStats] = useState([]);
     const router = useRouter();
 
     useEffect(() => {
@@ -28,6 +29,12 @@ export default function Dashboard() {
                 .catch((error) => console.error("Error fetching stats:", error));
         }
     }, [user]);
+
+    useEffect(() => {
+        const socket = new WebSocket("ws://log-analytics-backend.onrender.com/api/live-stats");
+        socket.onmessage = event => setStats(JSON.parse(event.data));
+        return () => socket.close();
+    }, []);
 
     if (!user) return <p>Loading...</p>;
 

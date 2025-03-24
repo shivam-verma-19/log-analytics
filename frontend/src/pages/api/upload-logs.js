@@ -1,30 +1,51 @@
-import Cors from 'next-cors';
+import formidable from "formidable";
+import supabase from "../config/supabaseClient";
+import queue from "../../../../backend/queues/logQueue";
+
 export const config = {
     api: {
-        bodyParser: {
-            sizeLimit: "100mb", // Increase limit for large files
-        },
+        bodyParser: false,
     },
 };
 
+const supabase = createClient();
+
 export default async function handler(req, res) {
-    await Cors(req, res, {
-        methods: ['POST', 'OPTIONS'],
-        origin: '*',
-        optionsSuccessStatus: 200
-    });
-
-    if (req.method === "OPTIONS") return res.status(200).end();
-
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
 
-    try {
-        console.log("Received Log Data:", req.body);
-        res.status(200).json({ message: "Logs uploaded successfully" });
-    } catch (error) {
-        console.error("Upload failed:", error);
-        res.status(500).json({ error: "Error uploading logs", details: error.message });
-    }
+    const form = new formidable.IncomingForm();
+    form.uploadDir = "/tmp";
+    form.keepExtensions = true;
+
+    form.parse(req, async (err, fields, files) => {
+        if (err) {
+            console.error("Error parsing form:", err);
+            return res.status(500).json({ error: "File upload failed" });
+        }
+
+        const file = files.file;
+        if (!file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        try {
+            const { data, error } = await supabase.storage
+                .from("log-files")
+                .upload(`logs/${file.newFilename}`, file.filepath, { cacheControl: "3600", upsert: false });
+
+            if (error) throw error;
+
+            const filePath = data?.path;
+            console.log("✅ File uploaded to Supabase:", filePath);
+
+            await queue.add("process-log", { filePath });
+
+            return res.status(200).json({ message: "File uploaded successfully", filePath });
+        } catch (uploadError) {
+            console.error("Upload Error:", uploadError);
+            return res.status(500).json({ error: "Internal Server Error during file upload" });
+        }
+    });
 }

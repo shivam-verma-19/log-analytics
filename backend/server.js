@@ -8,7 +8,8 @@ import uploadRoutes from "./routes/upload.js";
 import statsRoutes from "./routes/stats.js";
 import queueStatusRoutes from "./routes/queue-status.js";
 import { client, connectRedis } from "./config/redisConfig.js";
-
+import cluster from "cluster";
+import os from "os";
 dotenv.config(); // Load environment variables
 
 const app = express();
@@ -65,11 +66,16 @@ app.get("/api/health", (req, res) => {
     res.status(200).json({ status: "ok" });
 });
 
-// Start the server even if Redis is down
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-});
+const numCPUs = os.cpus().length;
+
+if (cluster.isPrimary) {
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+} else {
+    app.listen(PORT, () => console.log(`Worker running on port ${PORT}`));
+}
+
 
 // Attempt to connect Redis asynchronously
 connectRedis();
