@@ -1,4 +1,3 @@
-import { queue } from "@/utils/bullmq";
 import queue from "../../../../backend/queues/logQueue";
 
 

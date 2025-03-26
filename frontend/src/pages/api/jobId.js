@@ -1,4 +1,4 @@
-import supabase from "../config/supabaseClient";
+import supabase from "../../config/supabaseClient";
 
 export default async function handler(req, res) {
     const { jobId } = req.query;

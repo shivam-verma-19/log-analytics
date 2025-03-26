@@ -1,5 +1,5 @@
 import formidable from "formidable";
-import supabase from "../config/supabaseClient";
+import supabase from "../../config/supabaseClient";
 import queue from "../../../../backend/queues/logQueue";
 
 export const config = {
@@ -7,8 +7,6 @@ export const config = {
         bodyParser: false,
     },
 };
-
-const supabase = createClient();
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {

@@ -73,7 +73,9 @@ if (cluster.isPrimary) {
         cluster.fork();
     }
 } else {
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`Worker running on port ${PORT}`));
+
 }
 
 
