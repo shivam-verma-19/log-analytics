@@ -1,5 +1,4 @@
-import queue from "../../lib/logQueue"; //frontend\src\lib\logQueue.js
-
+import { logQueue } from '../../lib/logQueue';
 
 export default async function handler(req, res) {
     if (req.method !== "GET") {
@@ -7,7 +6,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const jobCounts = await queue.getJobCounts();
+        const jobCounts = await logQueue.getJobCounts();
         console.log("✅ Queue Status:", jobCounts);
         return res.status(200).json(jobCounts);
     } catch (error) {

@@ -1,6 +1,6 @@
 import formidable from "formidable";
 import supabase from "../../config/supabaseClient";
-import queue from "../../lib/logQueue";
+import { logQueue } from '../../lib/logQueue';
 
 export const config = {
     api: {
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
             const filePath = data?.path;
             console.log("✅ File uploaded to Supabase:", filePath);
 
-            await queue.add("process-log", { filePath });
+            await logQueue.add("process-log", { filePath });
 
             return res.status(200).json({ message: "File uploaded successfully", filePath });
         } catch (uploadError) {
