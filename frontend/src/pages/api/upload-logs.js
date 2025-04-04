@@ -1,6 +1,6 @@
 import formidable from "formidable";
 import supabase from "../../config/supabaseClient";
-import queue from "../../../../backend/queues/logQueue";
+import queue from "../../lib/logQueue";
 
 export const config = {
     api: {

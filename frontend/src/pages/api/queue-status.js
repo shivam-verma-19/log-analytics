@@ -1,4 +1,4 @@
-import queue from "../../../../backend/queues/logQueue";
+import queue from "../../lib/logQueue"; //frontend\src\lib\logQueue.js
 
 
 export default async function handler(req, res) {
