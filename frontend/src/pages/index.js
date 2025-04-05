@@ -31,7 +31,7 @@ export default function Dashboard() {
     }, [user]);
 
     useEffect(() => {
-        const socket = new WebSocket("ws://log-analytics-backend.onrender.com/api/live-stats");
+        const socket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://log-analytics-backend.onrender.com/api/live-stats`);
         socket.onmessage = event => setStats(JSON.parse(event.data));
         return () => socket.close();
     }, []);

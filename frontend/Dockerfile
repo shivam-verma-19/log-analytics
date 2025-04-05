@@ -32,7 +32,7 @@ RUN cat .env.production
 RUN npm run build
 
 # Expose frontend port
-EXPOSE 3000
+EXPOSE 10000
 
 # Start Next.js in production mode
 CMD ["npm", "run", "start"]
