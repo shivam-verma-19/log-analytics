@@ -50,14 +50,33 @@ const io = new Server(server, {
     }
 });
 
+io.use(async (socket, next) => {
+    const token = socket.handshake.auth?.token;
+
+    if (!token) {
+        return next(new Error("No auth token"));
+    }
+
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+        console.error("❌ WebSocket Auth Error:", error?.message);
+        return next(new Error("Unauthorized"));
+    }
+
+    socket.user = user; // Save for later
+    next();
+});
+
 // WebSocket Connection Handling
 io.on("connection", (socket) => {
-    console.log("Client connected");
+    console.log("✅ WebSocket connected for user:", socket.user.email);
 
     socket.on("disconnect", () => {
-        console.log("Client disconnected");
+        console.log("WebSocket disconnected");
     });
 });
+
 
 app.get("/", (req, res) => {
     res.send("Server is running!");

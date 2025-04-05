@@ -14,7 +14,7 @@ const processLargeFile = async (filePath, fileId) => {
 
     try {
         const job = await queue.add(
-            "log-processing",
+            "log-processing-queue",
             { filePath, fileId },
             {
                 priority,
