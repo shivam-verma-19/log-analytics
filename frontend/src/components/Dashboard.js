@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import supabase from "../config/supabaseClient";
 import { useRouter } from 'next/navigation';
+import { io } from "socket.io-client";
 
 export default function Dashboard() {
     const [stats, setStats] = useState([]);
@@ -25,13 +26,20 @@ export default function Dashboard() {
         checkAuth();
 
         fetchStats(token);
-        const ws = new WebSocket('wss://log-analytics-backend.onrender.com/api/live-stats'); // Adjust WebSocket URL
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setStats((prev) => [data, ...prev]); // Update with real-time data
-        };
 
-        return () => ws.close();
+        const socket = io("https://log-analytics-backend.onrender.com", {
+            transports: ["websocket"],
+        });
+
+        socket.on("connect", () => {
+            console.log("✅ Socket.IO connected");
+        });
+
+        socket.on("live-stats", (data) => {
+            setStats((prev) => [data, ...prev]);
+        });
+
+        return () => socket.disconnect();
     }, []);
 
     async function fetchStats() {
