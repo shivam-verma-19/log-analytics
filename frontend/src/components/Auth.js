@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import supabase from "../config/supabaseClient";
 import { useRouter } from "next/router";
+import crypto from "crypto";
 
 export default function Auth() {
     const [email, setEmail] = useState("");
@@ -34,6 +35,7 @@ export default function Auth() {
             logoutTimer = setTimeout(() => {
                 supabase.auth.signOut();
                 localStorage.removeItem("supabaseToken"); // ✅ Clear session
+                // Decrypt token if needed in future logic
                 router.push("/auth"); // ✅ Redirect to login
             }, 5 * 60 * 1000); // 5 minutes
         };
@@ -71,7 +73,8 @@ export default function Auth() {
             setError(error.message);
         } else {
             alert("Signed in successfully!");
-            localStorage.setItem("supabaseToken", data.session.access_token);
+            const encryptedToken = encrypt(data.session.access_token);
+            localStorage.setItem("supabaseToken", encryptedToken);
             supabase.auth.setSession(data.session);
             router.push("/"); // Redirect to Dashboard
         }
