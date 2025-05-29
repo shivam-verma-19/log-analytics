@@ -18,7 +18,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
+    "@supabase/supabase-js": "^2.49.8",
     "bullmq": "^5.53.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
