@@ -28,7 +28,7 @@
     "next": "^15.3.2",
     "p-limit": "^6.2.0",
     "react": "^19.1.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19.1.0",
     "redis": "^5.1.0",
     "supabase": "^2.19.7",
     "supertest": "^7.0.0",
