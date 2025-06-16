@@ -24,7 +24,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
-    "multer": "^2.0.0",
+    "multer": "^2.0.1",
     "next": "^15.3.2",
     "p-limit": "^6.2.0",
     "react": "^19.1.0",
