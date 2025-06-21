@@ -1,15 +1,16 @@
-const API_URL = process.env.BACKEND_URL || "http://localhost:5000";
+import { logQueue } from '../../lib/logQueue';
 
 export default async function handler(req, res) {
-    if (req.method === "GET") {
-        try {
-            const response = await fetch(`${API_URL}/api/queue-status`);
-            const jobCounts = await response.json();
-            return res.status(200).json(jobCounts);
-        } catch (error) {
-            return res.status(500).json({ error: "Error fetching queue status", details: error.message });
-        }
-    } else {
-        res.status(405).json({ error: "Method Not Allowed" });
+    if (req.method !== "GET") {
+        return res.status(405).json({ error: "Method Not Allowed" });
+    }
+
+    try {
+        const jobCounts = await logQueue.getJobCounts();
+        console.log("✅ Queue Status:", jobCounts);
+        return res.status(200).json(jobCounts);
+    } catch (error) {
+        console.error("Error fetching queue status:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 }

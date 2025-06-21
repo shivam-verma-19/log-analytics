@@ -1,22 +1,62 @@
-import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY);
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_KEY) {
-    console.error("Supabase environment variables are missing!");
-}
+import { useState, useEffect } from "react";
+import supabase from "../config/supabaseClient";
+import { useRouter } from "next/router";
+import crypto from "crypto";
 
 export default function Auth() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [session, setSession] = useState(null); // Track session state
+
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setSession(session);
+        };
+
+        checkSession();
+
+        const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+            setSession(session);
+        });
+
+        return () => listener.subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        let logoutTimer;
+
+        const resetTimer = () => {
+            clearTimeout(logoutTimer);
+            logoutTimer = setTimeout(() => {
+                supabase.auth.signOut();
+                localStorage.removeItem("supabaseToken"); // ✅ Clear session
+                // Decrypt token if needed in future logic
+                router.push("/auth"); // ✅ Redirect to login
+            }, 5 * 60 * 1000); // 5 minutes
+        };
+
+        if (session) {
+            resetTimer();
+            window.addEventListener("mousemove", resetTimer);
+            window.addEventListener("keydown", resetTimer);
+        }
+
+        return () => {
+            clearTimeout(logoutTimer);
+            window.removeEventListener("mousemove", resetTimer);
+            window.removeEventListener("keydown", resetTimer);
+        };
+    }, [session]);
 
     const handleSignUp = async () => {
         setLoading(true);
         setError(null);
-
-        const { user, error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email, password });
 
         if (error) setError(error.message);
         else alert("Check your email for a confirmation link!");
@@ -27,11 +67,17 @@ export default function Auth() {
     const handleSignIn = async () => {
         setLoading(true);
         setError(null);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-        const { user, error } = await supabase.auth.signInWithPassword({ email, password });
-
-        if (error) setError(error.message);
-        else alert("Signed in successfully!");
+        if (error) {
+            setError(error.message);
+        } else {
+            alert("Signed in successfully!");
+            const encryptedToken = encrypt(data.session.access_token);
+            localStorage.setItem("supabaseToken", encryptedToken);
+            supabase.auth.setSession(data.session);
+            router.push("/"); // Redirect to Dashboard
+        }
 
         setLoading(false);
     };

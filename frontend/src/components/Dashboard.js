@@ -1,53 +1,99 @@
-import { useEffect, useState } from "react";
+'use client';
+
+import { useEffect, useState } from 'react';
+import supabase from "../config/supabaseClient";
+import { useRouter } from 'next/navigation';
+import { io } from "socket.io-client";
 
 export default function Dashboard() {
     const [stats, setStats] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
-        async function fetchStats() {
-            try {
-                const response = await fetch("/api/queue-status");
-                const data = await response.json();
-                setStats(data);
-            } catch (error) {
-                console.error("Error fetching stats:", error);
-            } finally {
-                setLoading(false);
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                router.push('/login'); // Redirect to login if no session
+                return;
             }
+
+            fetchStats(); // Fetch logs only after verifying auth
         }
 
-        fetchStats();
+        checkAuth();
+
+        fetchStats(token);
+
+        const socket = io("https://log-analytics-backend.onrender.com", {
+            transports: ["websocket"],
+        });
+
+        socket.on("connect", () => {
+            console.log("✅ Socket.IO connected");
+        });
+
+        socket.on("live-stats", (data) => {
+            setStats((prev) => [data, ...prev]);
+        });
+
+        return () => socket.disconnect();
     }, []);
 
-    if (loading) return <p>Loading...</p>;
+    async function fetchStats() {
+        const { data, error } = await supabase.from('log_stats').select('*');
+        if (error) console.error('Error fetching stats:', error);
+        else setStats(data);
+    }
+
+    async function handleFileUpload() {
+        if (!file) return;
+        setUploading(true);
+
+        const filePath = `logs/${Date.now()}_${file.name}`;
+        const { data, error } = await supabase.storage.from('logs').upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false // Prevent overwriting
+        });
+        if (error) console.error('Upload error:', error);
+        else alert('File uploaded successfully!');
+
+        setUploading(false);
+    }
 
     return (
-        <div className="p-4">
-            <h2 className="text-2xl font-bold">Log Processing Stats</h2>
-            <table className="table-auto w-full mt-4 border-collapse border border-gray-300">
+        <div className="p-4 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-4">Log Dashboard</h2>
+            <input type="file" onChange={(e) => setFile(e.target.files[0])} className="mb-2" />
+            <button onClick={handleFileUpload} disabled={uploading} className="bg-blue-500 text-white p-2 mb-4">
+                {uploading ? 'Uploading...' : 'Upload Log File'}
+            </button>
+
+            <table className="w-full border">
                 <thead>
-                    <tr className="bg-gray-100">
-                        <th className="border p-2">File Name</th>
-                        <th className="border p-2">Error Count</th>
-                        <th className="border p-2">Processed At</th>
+                    <tr className="bg-gray-200">
+                        <th className="p-2">Job ID</th>
+                        <th className="p-2">Error Count</th>
+                        <th className="p-2">Keyword Count</th>
+                        <th className="p-2">Unique IPs</th>
+                        <th className="p-2">Created At</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {stats.length === 0 ? (
-                        <tr>
-                            <td colSpan="3" className="text-center p-4">
-                                No logs processed yet.
-                            </td>
-                        </tr>
-                    ) : (
+                    {Array.isArray(stats) && stats.length > 0 ? (
                         stats.map((stat) => (
-                            <tr key={stat.id} className="border-b">
-                                <td className="border p-2">{stat.file_name}</td>
-                                <td className="border p-2">{stat.error_count}</td>
-                                <td className="border p-2">{new Date(stat.created_at).toLocaleString()}</td>
+                            <tr key={stat.id} className="border-t">
+                                <td className="p-2">{stat.job_id}</td>
+                                <td className="p-2">{stat.error_count}</td>
+                                <td className="p-2">{JSON.stringify(stat.keyword_count)}</td>
+                                <td className="p-2">{JSON.stringify(stat.unique_ips)}</td>
+                                <td className="p-2">{new Date(stat.created_at).toLocaleString()}</td>
                             </tr>
                         ))
+                    ) : (
+                        <tr><td colSpan="5" className="p-2 text-center">No data available</td></tr>
                     )}
                 </tbody>
             </table>

@@ -6,17 +6,26 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start -p $PORT"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "next": "^15.2.2",
+    "@supabase/supabase-js": "^2.49.1",
+    "bullmq": "^5.47.0",
+    "cluster": "^0.7.7",
+    "express-rate-limit": "^7.5.0",
+    "formidable": "^3.5.2",
+    "ioredis": "^5.6.0",
+    "next": "^15.2.3",
+    "next-cors": "^1.0.0",
+    "os": "^0.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "crypto-browserify": "^3.12.1"
   }
 }

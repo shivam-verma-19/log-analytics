@@ -1,11 +1,10 @@
-const API_URL = process.env.BACKEND_URL || "http://localhost:5000";
-
 export default async function handler(req, res) {
     if (req.method === "GET") {
         try {
-            const response = await fetch(`${API_URL}/api/queue-status`);
-            const data = await response.json();
-            return res.status(200).json(data);
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+            const response = await fetch(`${backendUrl}/api/queue-status`);
+            const jobCounts = await response.json();
+            return res.status(200).json(jobCounts);
         } catch (error) {
             return res.status(500).json({ error: "Error fetching queue status", details: error.message });
         }
