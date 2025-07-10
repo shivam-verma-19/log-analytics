@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
-    "bullmq": "^5.56.0",
+    "bullmq": "^5.56.3",
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
     "express": "^5.1.0",
