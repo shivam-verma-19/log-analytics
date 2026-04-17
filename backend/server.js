@@ -24,8 +24,24 @@ const errorHandler = (err, req, res, next) => {
 };
 app.use(errorHandler);
 
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || '*',
+    origin: (origin, callback) => {
+        // Allow non-browser or same-origin requests with no Origin header
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Not allowed by CORS"), false);
+    },
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
@@ -45,7 +61,7 @@ app.use("/api/", limiter); // Apply rate-limiting to API routes
 
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        origin: allowedOrigins,
         methods: ["GET", "POST"]
     }
 });
