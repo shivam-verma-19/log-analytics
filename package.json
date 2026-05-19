@@ -30,7 +30,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.5",
     "redis": "^5.9.0",
-    "supabase": "^2.26.9",
+    "supabase": "^2.100.0",
     "supertest": "^7.1.4",
     "swr": "^2.3.4",
     "winston": "^3.19.0",
